@@ -57,3 +57,51 @@ class Codeforces:
                     count += 1
 
         return count
+    
+    ## Detailed amount of solved problems for a single user.
+    # An array of intervals is mandatory
+    @classmethod
+    def solved_problems_intervals(self, user, intervals):
+
+        response = requests.get(self.base_url + "user.status?handle=" + user)
+        if response.status_code != 200:
+            print("Time Out")
+            return -1
+        
+        response = response.json()
+        result = response["result"]
+
+        n = len(intervals)
+        count = [0] * n
+
+        for submmision in result:
+            if submmision["verdict"] == "OK":
+                unix_timestamp = submmision["creationTimeSeconds"]
+                timestamp_datetime = datetime.datetime.utcfromtimestamp(unix_timestamp)
+
+                for i in range(n):
+                    interval = intervals[i]
+                    if timestamp_datetime >= interval["start"] and timestamp_datetime <= interval["end"]:
+                        count[i] += 1
+
+        print(count)
+
+        return count
+
+
+    
+    # Get user current rating
+    @classmethod
+    def get_user_rating(self,user):
+        response = requests.get(self.base_url + "user.info?handles=" + user)
+        if response.status_code != 200:
+            print("Failed request")
+            return -1
+        
+        response = response.json()
+        result = response["result"]
+
+        if result[0].get("rating") == None:
+            return -1
+        else:
+            return result[0]["rating"]
